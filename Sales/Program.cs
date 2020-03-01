@@ -6,10 +6,11 @@ namespace Sales
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Sales System");
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine("**** SALES SYSTEM ****");
+            Console.ResetColor();
 
-            var handler = new MessageHandler();
-            handler.ProcessMessage();
+            new MessageHandler().ProcessMessage();
         }
     }
 }

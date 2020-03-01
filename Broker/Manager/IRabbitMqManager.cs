@@ -1,5 +1,7 @@
 ﻿using Broker.Message;
+using Broker.Message.Base;
 using RabbitMQ.Client;
+using System;
 
 namespace Broker.Manager
 {
@@ -12,6 +14,8 @@ namespace Broker.Manager
         void PublishDelivery(DeliveryMessage message);
 
         void PublishSale(SaleMessage message);
+
+        void ProcessMessage<T>(string queueName, Func<MessageBase, bool> onRecive = null) where T : MessageBase;
 
         IModel GetChannel();
 

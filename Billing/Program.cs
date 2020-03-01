@@ -6,7 +6,11 @@ namespace Billing
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("**** BILLING SYSTEM ****");
+            Console.ResetColor();
+
+            new MessageHandler().ProcessMessage();
         }
     }
 }

@@ -4,9 +4,9 @@ using Broker.Pool;
 using Broker.Util;
 using Microsoft.Extensions.Options;
 
-namespace Sales
+namespace Delivery
 {
-    public class MessageHandler
+    public class MessageHanlder
     {
         #region Private Fields
 
@@ -16,10 +16,9 @@ namespace Sales
 
         #region Public Constructors
 
-        public MessageHandler()
+        public MessageHanlder()
         {
             var options = Options.Create(BrokerUtil.GetRabbitMqDefaultOptions());
-
             rabbitMqManager = new RabbitMqManager(new RabbitMqModelPooledObjectPolicy(options));
         }
 
@@ -28,9 +27,8 @@ namespace Sales
         #region Public Methods
 
         public void ProcessMessage()
-            => rabbitMqManager.ProcessMessage<SaleMessage>(RabbitMqConstants.SalesQueueName);
+          => rabbitMqManager.ProcessMessage<DeliveryMessage>(RabbitMqConstants.DeliveryQueueName);
 
         #endregion Public Methods
-
     }
 }

@@ -1,10 +1,11 @@
 ﻿using Broker.Manager;
 using Broker.Message;
+using Broker.Message.Base;
 using Broker.Pool;
 using Broker.Util;
 using Microsoft.Extensions.Options;
 
-namespace Sales
+namespace Billing
 {
     public class MessageHandler
     {
@@ -19,7 +20,6 @@ namespace Sales
         public MessageHandler()
         {
             var options = Options.Create(BrokerUtil.GetRabbitMqDefaultOptions());
-
             rabbitMqManager = new RabbitMqManager(new RabbitMqModelPooledObjectPolicy(options));
         }
 
@@ -28,9 +28,25 @@ namespace Sales
         #region Public Methods
 
         public void ProcessMessage()
-            => rabbitMqManager.ProcessMessage<SaleMessage>(RabbitMqConstants.SalesQueueName);
+            => rabbitMqManager.ProcessMessage<BillingMessage>(RabbitMqConstants.BillingQueueName, 
+                message => PublishDelivery(message));
 
         #endregion Public Methods
 
+        private bool PublishDelivery(MessageBase messageBase)
+        {
+            if (!(messageBase is BillingMessage message))
+                return false;
+
+            rabbitMqManager.PublishDelivery(new DeliveryMessage
+            {
+                Address = string.Empty,
+                Customer = message.Customer,
+                MaxDeliveryDate = message.BillingDate.AddDays(5),
+                Product = message.Product
+            });
+
+            return true;
+        }
     }
 }

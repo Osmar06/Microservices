@@ -6,7 +6,11 @@ namespace Delivery
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("**** DELIVERY SYSTEM ****");
+            Console.ResetColor();
+
+            new MessageHanlder().ProcessMessage();
         }
     }
 }

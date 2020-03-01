@@ -1,6 +1,9 @@
-﻿using Broker.Message;
+﻿using Broker.Extension;
+using Broker.Message;
+using Broker.Message.Base;
 using Microsoft.Extensions.ObjectPool;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System;
 using System.Text;
 using System.Text.Json;
@@ -24,11 +27,41 @@ namespace Broker.Manager
             channel = GetConnection();
         }
 
-        public IModel GetChannel() => channel;
-
         #endregion Public Constructors
 
         #region Public Methods
+
+        public IModel GetChannel() => channel;
+
+        public void ProcessMessage<T>(string queueName, Func<MessageBase, bool> onRecive = null) where T : MessageBase
+        {
+            var channel = GetChannel();
+            var consumer = new EventingBasicConsumer(channel);
+
+            consumer.Received += (ch, ea) =>
+            {
+                var body = Encoding.Default.GetString(ea.Body);
+                var message = JsonSerializer.Deserialize<T>(body);
+
+                Console.WriteLine($"\nRouting Key <{ea.RoutingKey}>");
+                Console.WriteLine($"---- Queue {queueName} Info ---- \n");
+
+                var values = message.ToDictionary();
+                foreach (var messageValue in values)
+                    Console.WriteLine($"{messageValue.Key}: {messageValue.Value}");
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("\nEnd of message\n");
+                Console.ResetColor();
+
+                onRecive?.Invoke(message);
+
+                channel.BasicAck(ea.DeliveryTag, false);
+            };
+
+            var consumerTag = channel.BasicConsume(queueName, false, consumer);
+            Console.WriteLine($"Consumer: {consumerTag}");
+        }
 
         public void PublishBilling(BillingMessage message)
         {
@@ -49,8 +82,6 @@ namespace Broker.Manager
         }
 
         #endregion Public Methods
-
-
 
         #region Private Methods
 

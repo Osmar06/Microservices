@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using Web.Models;
+using Web.Services;
 
 namespace Web.Controllers
 {
@@ -13,16 +14,16 @@ namespace Web.Controllers
         #region Private Fields
 
         private readonly ILogger<HomeController> _logger;
-        private readonly IRabbitMqManager manager;
+        private readonly IOrderService orderService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public HomeController(ILogger<HomeController> logger, IRabbitMqManager manager)
+        public HomeController(ILogger<HomeController> logger, IOrderService orderService)
         {
             _logger = logger;
-            this.manager = manager;
+            this.orderService = orderService;
         }
 
         #endregion Public Constructors
@@ -47,14 +48,7 @@ namespace Web.Controllers
 
         public IActionResult SendOrder(OrderInputModel orderInputModel)
         {
-            manager.PublishSale(new SaleMessage
-            {
-                SaleDate = DateTime.Now,
-                Customer = orderInputModel.Customer,
-                Price = orderInputModel.Price,
-                Product = orderInputModel.Product,
-                Quantity = orderInputModel.Quantity
-            });
+            orderService.CreateOrder(orderInputModel);
 
             return RedirectToAction("Index");
         }

@@ -1,5 +1,6 @@
 ﻿using Broker.Manager;
 using Broker.Pool;
+using Broker.Util;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.ObjectPool;
@@ -13,8 +14,16 @@ namespace Web.Extension
 
         public static IServiceCollection AddRabbitMq(this IServiceCollection services, IConfiguration configuration)
         {
-            var rabbitConfig = configuration.GetSection("RabbitMQ");
-            services.Configure<RabbitMqOptions>(rabbitConfig);
+            //ToDo: the options must be in appsettings.json
+            var defaultOptions = BrokerUtil.GetRabbitMqDefaultOptions();
+            services.Configure<RabbitMqOptions>(opt =>
+            {
+                opt.HostName = defaultOptions.HostName;
+                opt.Password = defaultOptions.Password;
+                opt.Port = defaultOptions.Port;
+                opt.UserName = defaultOptions.UserName;
+                opt.VHost = defaultOptions.VHost;
+            });
 
             services.AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
             services.AddSingleton<IPooledObjectPolicy<IModel>, RabbitMqModelPooledObjectPolicy>();
