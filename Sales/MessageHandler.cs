@@ -1,8 +1,10 @@
 ﻿using Broker.Manager;
 using Broker.Message;
+using Broker.Message.Base;
 using Broker.Pool;
 using Broker.Util;
 using Microsoft.Extensions.Options;
+using System;
 
 namespace Sales
 {
@@ -28,7 +30,24 @@ namespace Sales
         #region Public Methods
 
         public void ProcessMessage()
-            => rabbitMqManager.ProcessMessage<SaleMessage>(RabbitMqConstants.SalesQueueName);
+            => rabbitMqManager.ProcessMessage<SaleMessage>(RabbitMqConstants.SalesQueueName, 
+                message => PublishBilling(message));
+        private bool PublishBilling(MessageBase messageBase)
+        {
+            if (!(messageBase is SaleMessage message))
+                return false;
+
+            rabbitMqManager.PublishBilling(new BillingMessage
+            {
+                Price = message.Price,
+                BillingDate = DateTime.Now,
+                Customer = message.Customer,
+                Quantity = message.Quantity,
+                Product = message.Product
+            });
+
+            return true;
+        }
 
         #endregion Public Methods
 
